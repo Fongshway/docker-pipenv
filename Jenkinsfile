@@ -11,7 +11,8 @@ pipeline {
         }
         stage('Test image') {
             steps {
-                sh "echo 'Tests go here'"
+                sh "docker run -v /var/run/docker.sock:/var/run/docker.sock --name pytest fongshway/pytest pytest --junitxml=/app/test_report.xml"
+                sh "docker cp pytest:/app/test_report.xml ."
             }
         }
         stage('Push image') {
