@@ -20,3 +20,7 @@ def host(request):
 
 def test_pipenv_is_present(host):
     assert host.file("/usr/local/bin/pipenv").exists
+
+
+def test_widget_is_present(host):
+    assert host.file("/usr/local/bin/widget").exists
