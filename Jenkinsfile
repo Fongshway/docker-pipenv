@@ -3,21 +3,24 @@ pipeline {
     options {
         disableConcurrentBuilds()
     }
+    environment {
+        DOCKER_IMAGE = "fongshway/pipenv"
+    }
     stages {
-        stage('Build image') {
+        stage("Build image") {
             steps {
-                sh "docker build . -t fongshway/pipenv:${BRANCH_NAME}"
+                sh "docker build . -t $DOCKER_IMAGE:${BRANCH_NAME}"
             }
         }
-        stage('Test image') {
+        stage("Test image") {
             steps {
                 sh "docker run -v /var/run/docker.sock:/var/run/docker.sock --name pytest fongshway/pytest pytest --junitxml=/app/test_report.xml"
             }
         }
-        stage('Push image') {
+        stage("Push image") {
             steps {
-                withDockerRegistry([credentialsId: 'docker-hub-credentials', url: 'https://registry.hub.docker.com/fongshway/pipenv']) {
-                  sh "docker push fongshway/pipenv:${BRANCH_NAME}"
+                withDockerRegistry([credentialsId: "docker-hub-credentials", url: "https://registry.hub.docker.com/$DOCKER_IMAGE"]) {
+                  sh "docker push $DOCKER_IMAGE:${BRANCH_NAME}"
                 }
             }
         }
