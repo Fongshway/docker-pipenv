@@ -8,4 +8,4 @@ services:
     volumes:
       - .:/app:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
-    entrypoint: pytest --junitxml=/app/test_report.xml
+    entrypoint: pytest -v --junitxml=/app/test_report.xml
