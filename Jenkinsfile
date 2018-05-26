@@ -23,6 +23,7 @@ pipeline {
                             ''')
                         } finally {
                             sh('''
+                                docker cp pytest:/app/test_report.xml .
                                 docker-compose -f docker-compose.test.yml down || echo "Docker compose down failed"
                             ''')
                         }
@@ -51,7 +52,6 @@ pipeline {
     }
     post {
         always {
-            sh "docker cp pytest:/app/test_report.xml ."
             junit 'test_report.xml'
             sh "docker system prune -f"
         }
