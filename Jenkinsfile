@@ -14,21 +14,10 @@ pipeline {
         }
         stage("Test image") {
             steps {
-                timeout(time: 10, unit: 'MINUTES') {
-                    script {
-                        try {
-                            sh('''
-                                docker-compose -f docker-compose.test.yml pull
-                                docker-compose -f docker-compose.test.yml up -d
-                            ''')
-                        } finally {
-                            sh('''
-                                docker cp pytest:/app/test_report.xml .
-                                docker-compose -f docker-compose.test.yml down || echo "Docker compose down failed"
-                            ''')
-                        }
-                    }
-                }
+                sh "docker-compose -f docker-compose.test.yml pull"
+                sh "docker-compose -f docker-compose.test.yml up -d"
+                sh "docker cp pytest:/app/test_report.xml ."
+                sh "docker-compose -f docker-compose.test.yml down"
             }
         }
         stage("Push dev image") {
