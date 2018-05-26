@@ -16,8 +16,6 @@ pipeline {
             steps {
                 sh "docker-compose -f docker-compose.test.yml pull"
                 sh "docker-compose -f docker-compose.test.yml up"
-                sh "docker cp pytest:/app/test_report.xml ."
-                sh "docker-compose -f docker-compose.test.yml down"
             }
         }
         stage("Push dev image") {
@@ -41,7 +39,9 @@ pipeline {
     }
     post {
         always {
-            junit 'test_report.xml'
+            sh "docker cp pytest:/app/test_report.xml ."
+            junit "test_report.xml"
+            sh "docker-compose -f docker-compose.test.yml down"
             sh "docker system prune -f"
         }
     }
