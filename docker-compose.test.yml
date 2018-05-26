@@ -6,6 +6,6 @@ services:
     image: fongshway/pytest
     hostname: pytest
     volumes:
-      - .:/app
+      - .:/app:rw
       - /var/run/docker.sock:/var/run/docker.sock:rw
     entrypoint: pytest --junitxml=/app/test_report.xml
