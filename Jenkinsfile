@@ -15,7 +15,7 @@ pipeline {
         stage("Test image") {
             steps {
                 sh "docker-compose -f docker-compose.test.yml pull"
-                sh "docker-compose -f docker-compose.test.yml up -d"
+                sh "docker-compose -f docker-compose.test.yml up"
                 sh "docker cp pytest:/app/test_report.xml ."
                 sh "docker-compose -f docker-compose.test.yml down"
             }
