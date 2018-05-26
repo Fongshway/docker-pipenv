@@ -9,12 +9,16 @@ pipeline {
     stages {
         stage("Build image") {
             steps {
-                sh "docker build --no-cache --force-rm . --tag $DOCKER_IMAGE:dev"
+                sh "echo 'Build goes here'"
             }
         }
         stage("Test image") {
             steps {
                 sh "docker-compose -f docker-compose.test.yml pull"
+                sh "whoami"
+                sh "pwd"
+                sh "ls -Fal"
+                sh "ls -Fal tests"
                 sh "docker-compose -f docker-compose.test.yml up"
             }
         }
