@@ -14,8 +14,20 @@ pipeline {
         }
         stage("Test image") {
             steps {
-                sh "docker pull fongshway/pytest"
-                sh "docker run -v /var/run/docker.sock:/var/run/docker.sock --name pytest fongshway/pytest pytest --junitxml=/app/test_report.xml"
+                timeout(time: 10, unit: 'MINUTES') {
+                    script {
+                        try {
+                            sh('''
+                                docker-compose -f docker-compose.test.yml pull
+                                docker-compose -f docker-compose.test.yml up -d
+                            ''')
+                        } finally {
+                            sh('''
+                                docker-compose -f docker-compose.test.yml down || echo "Docker compose down failed"
+                            ''')
+                        }
+                    }
+                }
             }
         }
         stage("Push dev image") {
