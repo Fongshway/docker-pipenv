@@ -9,6 +9,5 @@
 .pytest_cache
 .Python
 __pycache__
-Dockerfile
 pip-delete-this-directory.txt
 pip-log.txt
