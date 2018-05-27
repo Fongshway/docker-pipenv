@@ -40,7 +40,7 @@ pipeline {
         always {
             sh "docker cp pytest:/app/test_report.xml ."
             junit "test_report.xml"
-            sh "docker-compose -f docker-compose.test.yml down"
+            sh "docker-compose -f docker-compose.test.yml -p jenkinsbuild down --remove-orphans"
             sh "docker system prune -f"
         }
     }
