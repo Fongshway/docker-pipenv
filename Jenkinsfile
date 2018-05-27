@@ -23,6 +23,7 @@ pipeline {
                                 docker-compose -f $COMPOSE_FILE up -d --build --force-recreate
                                 sleep 10
                                 docker exec $TEST_CONTAINER_NAME bash -c "pytest -v"
+                                docker exec $TEST_CONTAINER_NAME bash -c "pylint tests"
                             ''')
                         } finally {
                             sh('''
