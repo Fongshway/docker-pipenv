@@ -15,7 +15,7 @@ pipeline {
         stage("Test image") {
             steps {
                 sh "docker-compose -f docker-compose.test.yml pull"
-                sh "docker-compose -f docker-compose.test.yml up"
+                sh "docker-compose -f docker-compose.test.yml -p jenkinsbuild up --build --force-recreate"
             }
         }
         stage("Push dev image") {
