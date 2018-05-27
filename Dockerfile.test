@@ -1,4 +1,3 @@
 FROM fongshway/pytest:master
 COPY . /app
 WORKDIR /app
-CMD pytest -v --junitxml=/app/test_report.xml
