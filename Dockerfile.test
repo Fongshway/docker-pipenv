@@ -1,5 +1,2 @@
-FROM fongshway/pipenv:master
-
-RUN apt-get install -y docker.io
-
+FROM fongshway/pytest:master
 COPY . /app
