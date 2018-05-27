@@ -1,0 +1,14 @@
+*.log
+*.pyc
+*.pyd
+*.pyo
+.cache
+.dockerignore
+.git
+.idea
+.pytest_cache
+.Python
+__pycache__
+Dockerfile
+pip-delete-this-directory.txt
+pip-log.txt
