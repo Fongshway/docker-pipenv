@@ -18,11 +18,15 @@ pipeline {
                     script {
                         try {
                             sh('''
-                                docker-compose -f docker-compose.test.yml -p jenkinsbuild up --build --force-recreate
+                                docker-compose -f docker-compose.test.yml -p jenkinsbuild up -d --build --force-recreate
+                                sleep 10
+                                docker exec jenkinsbuild_pytest_1 bash -c "pytest -v --junitxml=/app/test_report.xml"
                             ''')
                         } finally {
+                            sh("docker cp jenkinsbuild_pytest_1:/app/test_report.xml .")
+                            junit "test_report.xml"
                             sh('''
-                                docker-compose down  || echo "Docker compose down failed"
+                                docker-compose -f docker-compose.test.yml -p jenkinsbuild down --remove-orphans || echo "Docker compose down failed"
                             ''')
                         }
                     }
@@ -50,9 +54,6 @@ pipeline {
     }
     post {
         always {
-            sh "docker cp pytest:/app/test_report.xml ."
-            junit "test_report.xml"
-            sh "docker-compose -f docker-compose.test.yml -p jenkinsbuild down --remove-orphans"
             sh "docker system prune -f"
         }
     }
