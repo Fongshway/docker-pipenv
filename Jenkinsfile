@@ -5,6 +5,10 @@ pipeline {
     }
     environment {
         DOCKER_IMAGE = "fongshway/pipenv"
+        COMPOSE_FILE_LOC = "docker-compose.test.yml"
+        TEST_CONTAINER_NAME = "pipenv_pytest"
+        COMPOSE_PROJECT_NAME = "jenkinsbuild_${BUILD_TAG}"
+        TEST_CONTAINER_REF = "${COMPOSE_PROJECT_NAME}_${TEST_CONTAINER_NAME}_1"
     }
     stages {
         stage("Build image") {
@@ -18,15 +22,15 @@ pipeline {
                     script {
                         try {
                             sh('''
-                                docker-compose -f docker-compose.test.yml -p jenkinsbuild up -d --build --force-recreate
+                                docker-compose -f docker-compose.test.yml -p $COMPOSE_PROJECT_NAME up -d --build --force-recreate
                                 sleep 10
-                                docker exec jenkinsbuild_pytest_1 bash -c "pytest -v --junitxml=/app/test_report.xml"
+                                docker exec $TEST_CONTAINER_REF bash -c "pytest -v --junitxml=/app/test_report.xml"
                             ''')
                         } finally {
-                            sh("docker cp jenkinsbuild_pytest_1:/app/test_report.xml .")
+                            sh("docker cp $TEST_CONTAINER_REF:/app/test_report.xml .")
                             junit "test_report.xml"
                             sh('''
-                                docker-compose -f docker-compose.test.yml down --remove-orphans || echo "Docker compose down failed"
+                                docker-compose -f docker-compose.test.yml -p $COMPOSE_PROJECT_NAME down --remove-orphans || echo "Docker compose down failed"
                             ''')
                         }
                     }
