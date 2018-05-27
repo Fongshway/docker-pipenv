@@ -14,7 +14,19 @@ pipeline {
         }
         stage("Test image") {
             steps {
-                sh "docker-compose -f docker-compose.test.yml -p jenkinsbuild up --build --force-recreate"
+                timeout(time: 10, unit: 'MINUTES') {
+                    script {
+                        try {
+                            sh('''
+                                docker-compose -f docker-compose.test.yml -p jenkinsbuild up --build --force-recreate
+                            ''')
+                        } finally {
+                            sh('''
+                                docker-compose down  || echo "Docker compose down failed"
+                            ''')
+                        }
+                    }
+                }
             }
         }
         stage("Push dev image") {
