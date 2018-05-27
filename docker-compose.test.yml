@@ -2,6 +2,8 @@ version: "3"
 services:
 
   pytest:
+    container_name: pipenv_pytest
+    hostname: pipenv_pytest
     build:
       context: .
       dockerfile: Dockerfile.test
