@@ -3,7 +3,7 @@ services:
 
   pytest:
     container_name: pytest
-    image: fongshway/pytest
+    image: fongshway/pytest:master
     hostname: pytest
     volumes:
       - .:/app
