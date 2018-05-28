@@ -1,0 +1,3 @@
+FROM fongshway/pytest:master
+COPY . /app
+WORKDIR /app
