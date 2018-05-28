@@ -1,12 +1,13 @@
-import pytest
+# pylint: disable=redefined-outer-name,missing-docstring
 import subprocess
+import pytest
 import testinfra
 
 
 # scope='session' uses the same container for all the tests;
 # scope='function' uses a new container per test function.
 @pytest.fixture(scope='session')
-def host(request):
+def host():
     # build local ./Dockerfile
     subprocess.check_call(['docker', 'build', '-t', 'fongshway/pipenv', '.'])
     # run a container
