@@ -1,3 +1,4 @@
+// https://stdout.roman.zone/jenkins-docker-python
 pipeline {
     agent any
     options {
