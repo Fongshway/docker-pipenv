@@ -21,3 +21,8 @@ def host():
 
 def test_pipenv_is_present(host):
     assert host.file("/usr/local/bin/pipenv").exists
+
+
+def test_python_version(host):
+    version = host.check_output("python3 --version").strip()
+    assert version == "Python 3.6.5"
