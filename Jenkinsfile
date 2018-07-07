@@ -1,3 +1,4 @@
+// https://stdout.roman.zone/jenkins-docker-python
 pipeline {
     agent any
     options {
@@ -6,7 +7,7 @@ pipeline {
     environment {
         DOCKER_IMAGE = "fongshway/pipenv"
         COMPOSE_FILE = "docker-compose.test.yml"
-        TEST_CONTAINER_NAME = "pipenv_pytest"
+        TEST_CONTAINER_NAME = "pipenv_test"
     }
     stages {
         stage("Build image") {
