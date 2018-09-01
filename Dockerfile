@@ -1,35 +1,51 @@
-# Based on:
-# - https://github.com/pypa/pipenv/blob/master/Dockerfile and
-# - https://phoikoi.io/2018/04/03/bootstrap-pipenv-debian.html
-FROM ubuntu:18.04
+# https://github.com/pypa/pipenv/blob/master/Dockerfile
+################################################################################
+FROM python:3.6-slim
+################################################################################
+ONBUILD ARG PIPENV_INSTALL_OPTS="--deploy --system"
+ONBUILD ARG APP_USER="user"
+
+ENV PYTHONUNBUFFERED=1 \
+    PROJECT_DIR="/opt/app" \
+    PYTHONPATH="$PYTHONPATH:$PROJECT_DIR"
 
 # -- Install Pipenv:
-RUN apt-get update \
-  && apt-get install git build-essential libssl-dev zlib1g-dev libbz2-dev \
-     libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev -y \
-  && apt install python3-pip python3-setuptools -y \
-  && python3 -m pip install --system pipenv
+RUN apt update && apt -y dist-upgrade && \
+    apt install -y \
+      git \
+      sudo \
+      vim && \
+    pip install --upgrade pip && \
+    pip install pipenv && \
+    apt clean && rm -rf /var/lib/apt/lists/* && rm ~/.cache/pip* -rf
 
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-# -- Install Application into container:
-RUN set -ex && mkdir /app
+# -- Create addepar user:
+RUN useradd -ms /bin/bash $APP_USER && \
+    mkdir -p "$PROJECT_DIR" && \
+    chown -R $APP_USER: "$PROJECT_DIR" /usr/local /home/$APP_USER && \
+    usermod -aG sudo $APP_USER && \
+    sed -i.bkp -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' /etc/sudoers
 
-WORKDIR /app
+# -- Create application directory:
+RUN set -ex && mkdir -p $PROJECT_DIR
+WORKDIR "$PROJECT_DIR"
 
 # -- Adding Pipfiles
 ONBUILD COPY Pipfile Pipfile
 ONBUILD COPY Pipfile.lock Pipfile.lock
 
 # -- Install dependencies:
-ONBUILD RUN set -ex && pipenv install --deploy --system
+ONBUILD RUN set -ex && pipenv install $PIPENV_INSTALL_OPTS
 
-# --------------------
-# - Using This File: -
-# --------------------
+USER $APP_USER
 
-# FROM fongshway/pipenv
+################################################################################
+# Using this file
+################################################################################
+# FROM fongshway/pipenv:master
 
 # COPY . /app
 
