@@ -1,59 +1,28 @@
-// https://stdout.roman.zone/jenkins-docker-python
 pipeline {
     agent any
     options {
         disableConcurrentBuilds()
-    }
-    environment {
-        DOCKER_IMAGE = "fongshway/pipenv"
-        COMPOSE_FILE = "docker-compose.test.yml"
-        TEST_CONTAINER_NAME = "pipenv_test"
+        buildDiscarder(logRotator(numToKeepStr: '20'))
     }
     stages {
-        stage("Build image") {
+        stage("Build Docker Image") {
             steps {
-                sh "docker build --no-cache --force-rm . --tag $DOCKER_IMAGE:dev"
-            }
-        }
-        stage("Test image") {
-            steps {
-                timeout(time: 10, unit: 'MINUTES') {
-                    script {
-                        try {
-                            sh('''
-                                docker-compose -f $COMPOSE_FILE up -d --build --force-recreate
-                                sleep 10
-                            ''')
-                            sh('''
-                                docker exec $TEST_CONTAINER_NAME bash -c "pytest -v"
-                            ''')
-                            sh('''
-                                docker exec $TEST_CONTAINER_NAME bash -c "pylint tests"
-                            ''')
-                        } finally {
-                            sh('''
-                                docker-compose -f $COMPOSE_FILE down --remove-orphans || echo "Docker compose down failed"
-                            ''')
-                        }
-                    }
+                timeout(time: 5, unit: 'MINUTES') {
+                    sh('''
+                        docker build --no-cache --force-rm . --label pipenv --tag fongshway/pipenv:master
+                    ''')
                 }
             }
         }
-        stage("Push dev image") {
-            steps {
-                withDockerRegistry([credentialsId: "docker-hub-credentials", url: "https://registry.hub.docker.com/$DOCKER_IMAGE"]) {
-                  sh "docker push $DOCKER_IMAGE:dev"
-                }
-            }
-        }
-        stage("Push master image") {
+        stage("Push Image to DockerHub") {
             when {
                 branch "master"
             }
             steps {
-                sh "docker tag $DOCKER_IMAGE:dev $DOCKER_IMAGE:master"
-                withDockerRegistry([credentialsId: "docker-hub-credentials", url: "https://registry.hub.docker.com/$DOCKER_IMAGE"]) {
-                  sh "docker push $DOCKER_IMAGE:master"
+                timeout(time: 5, unit: 'MINUTES') {
+                    withDockerRegistry([credentialsId: "docker-hub-credentials", url: "https://registry.hub.docker.com/fongshway/pipenv"]) {
+                      sh "docker push fongshway/pipenv:master"
+                    }
                 }
             }
         }
