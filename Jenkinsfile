@@ -1,59 +1,69 @@
-// https://stdout.roman.zone/jenkins-docker-python
+def dockerComposeTeardown() {
+    sh("""
+        docker-compose down  || echo "Docker compose down failed"
+    """)
+}
+
 pipeline {
     agent any
     options {
         disableConcurrentBuilds()
-    }
-    environment {
-        DOCKER_IMAGE = "fongshway/pipenv"
-        COMPOSE_FILE = "docker-compose.test.yml"
-        TEST_CONTAINER_NAME = "pipenv_test"
+        buildDiscarder(logRotator(numToKeepStr: '50'))
     }
     stages {
-        stage("Build image") {
+        stage("Build Docker Image") {
             steps {
-                sh "docker build --no-cache --force-rm . --tag $DOCKER_IMAGE:dev"
+                timeout(time: 5, unit: 'MINUTES') {
+                    sh('''
+                        docker build --no-cache --force-rm . --label pipenv --tag fongshway/pipenv:master
+                    ''')
+                }
             }
         }
-        stage("Test image") {
+        stage('Setup Tests') {
             steps {
                 timeout(time: 10, unit: 'MINUTES') {
-                    script {
-                        try {
-                            sh('''
-                                docker-compose -f $COMPOSE_FILE up -d --build --force-recreate
-                                sleep 10
-                            ''')
-                            sh('''
-                                docker exec $TEST_CONTAINER_NAME bash -c "pytest -v"
-                            ''')
-                            sh('''
-                                docker exec $TEST_CONTAINER_NAME bash -c "pylint tests"
-                            ''')
-                        } finally {
-                            sh('''
-                                docker-compose -f $COMPOSE_FILE down --remove-orphans || echo "Docker compose down failed"
-                            ''')
-                        }
-                    }
+                    sh('''
+                        docker-compose up -d
+                        sleep 10
+                        docker exec pipenv bash -c "pipenv install pytest testinfra"
+                    ''')
+                }
+            }
+            post {
+                failure {
+                    dockerComposeTeardown()
                 }
             }
         }
-        stage("Push dev image") {
+        stage("Test Docker Image") {
             steps {
-                withDockerRegistry([credentialsId: "docker-hub-credentials", url: "https://registry.hub.docker.com/$DOCKER_IMAGE"]) {
-                  sh "docker push $DOCKER_IMAGE:dev"
+                timeout(time: 10, unit: 'MINUTES') {
+                    sh('''
+                        docker exec pipenv bash -c "pytest -v"
+                    ''')
+                }
+            }
+            post {
+                failure {
+                    dockerComposeTeardown()
                 }
             }
         }
-        stage("Push master image") {
+        stage('Tests Teardown') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    dockerComposeTeardown()
+                }
+            }
+        }
+        stage("Push Image to DockerHub") {
             when {
                 branch "master"
             }
             steps {
-                sh "docker tag $DOCKER_IMAGE:dev $DOCKER_IMAGE:master"
-                withDockerRegistry([credentialsId: "docker-hub-credentials", url: "https://registry.hub.docker.com/$DOCKER_IMAGE"]) {
-                  sh "docker push $DOCKER_IMAGE:master"
+                withDockerRegistry([credentialsId: "docker-hub-credentials", url: "https://registry.hub.docker.com/fongshway/pipenv"]) {
+                  sh "docker push fongshway/pipenv:master"
                 }
             }
         }
