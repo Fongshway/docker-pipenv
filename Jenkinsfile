@@ -2,7 +2,7 @@ pipeline {
     agent any
     options {
         disableConcurrentBuilds()
-        buildDiscarder(logRotator(numToKeepStr: '50'))
+        buildDiscarder(logRotator(numToKeepStr: '20'))
     }
     stages {
         stage("Build Docker Image") {
