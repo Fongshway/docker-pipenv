@@ -3,7 +3,7 @@
 FROM python:3.6-slim
 ################################################################################
 ONBUILD ARG PIPENV_INSTALL_OPTS="--deploy --system"
-ONBUILD ARG APP_USER="user"
+ARG APP_USER="user"
 
 ENV PYTHONUNBUFFERED=1 \
     PROJECT_DIR="/opt/app" \
