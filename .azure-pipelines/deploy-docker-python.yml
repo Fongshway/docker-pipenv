@@ -6,6 +6,8 @@ variables:
 trigger:
 - master
 
+pr: none
+
 pool:
   vmImage: 'ubuntu-16.04'
 
@@ -16,10 +18,13 @@ steps:
     command: login
     containerRegistry: $(imageRegistry)
 - task: Docker@2
-  displayName: Build Docker image
+  displayName: Build and Push
   inputs:
-    command: build
+    command: buildAndPush
+    containerRegistry: $(imageRegistry)
     repository: fongshway/pipenv
+    tags: |
+      master
 - task: Docker@2
   displayName: Logout of Docker Hub
   inputs:
