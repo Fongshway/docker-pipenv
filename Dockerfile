@@ -1,5 +1,6 @@
 ################################################################################
-FROM python:3.7-slim-buster  # https://hub.docker.com/_/python
+# https://hub.docker.com/_/python
+FROM python:3.7-slim-buster
 ################################################################################
 ONBUILD ARG PIPENV_INSTALL_OPTS="--deploy --system"
 ARG APP_USER="user"
