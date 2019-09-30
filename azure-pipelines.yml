@@ -4,6 +4,8 @@ variables:
 trigger:
 - master
 
+pr: none
+
 pool:
   vmImage: 'ubuntu-16.04'
 
