@@ -1,6 +1,6 @@
-# https://github.com/pypa/pipenv/blob/master/Dockerfile
 ################################################################################
-FROM python:3.6-slim
+# https://hub.docker.com/_/python
+FROM python:3.7-slim-buster
 ################################################################################
 ONBUILD ARG PIPENV_INSTALL_OPTS="--deploy --system"
 ARG APP_USER="user"
@@ -22,7 +22,7 @@ RUN apt update && apt -y dist-upgrade && \
 ENV LC_ALL C.UTF-8
 ENV LANG C.UTF-8
 
-# -- Create addepar user:
+# -- Create non-root user:
 RUN useradd -ms /bin/bash $APP_USER && \
     mkdir -p "$PROJECT_DIR" && \
     chown -R $APP_USER: "$PROJECT_DIR" /usr/local /home/$APP_USER && \
