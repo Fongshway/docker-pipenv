@@ -5,10 +5,13 @@ FROM python:3.7-slim-buster
 ONBUILD ARG REQUIREMENTS_INSTALL_CMD
 ONBUILD ENV REQUIREMENTS_INSTALL_CMD="${REQUIREMENTS_INSTALL_CMD:-NOT_DEFINED}"
 
-ENV PYTHONUNBUFFERED=1 \
+ENV LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8 \
     TERM=xterm \
-    PYTHON_PIP_VERSION="19.2.3" \
-    PYTHON_PIPENV_VERSION="2018.11.26" \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHON_PIP_VERSION=19.2.3 \
+    PYTHON_PIPENV_VERSION=2018.11.26 \
     PIP_NO_CACHE_DIR=1
 
 # -- Install Pipenv:
@@ -20,9 +23,6 @@ RUN apt update && apt -y dist-upgrade && \
     pip install pip==${PYTHON_PIP_VERSION} && \
     pip install pipenv==${PYTHON_PIPENV_VERSION} && \
     apt clean && rm -rf /var/lib/apt/lists/*
-
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
 
 # -- Add Pipfiles:
 ONBUILD COPY \
