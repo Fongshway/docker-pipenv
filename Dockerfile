@@ -17,7 +17,9 @@ ENV LC_ALL=C.UTF-8 \
 # -- Install Pipenv:
 RUN apt update && apt -y dist-upgrade && \
     apt install -y \
+      gcc \
       git \
+      procps \
       sudo \
       vim && \
     pip install pip==${PYTHON_PIP_VERSION} && \
