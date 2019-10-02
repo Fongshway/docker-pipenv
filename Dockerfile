@@ -2,12 +2,17 @@
 # https://hub.docker.com/_/python
 FROM python:3.7-slim-buster
 ################################################################################
-ONBUILD ARG PIPENV_INSTALL_OPTS="--deploy --system"
-ARG APP_USER="user"
+ONBUILD ARG REQUIREMENTS_INSTALL_CMD
+ONBUILD ENV REQUIREMENTS_INSTALL_CMD="${REQUIREMENTS_INSTALL_CMD:-NOT_DEFINED}"
 
-ENV PYTHONUNBUFFERED=1 \
-    PROJECT_DIR="/opt/app" \
-    PYTHONPATH="$PYTHONPATH:$PROJECT_DIR"
+ENV LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8 \
+    TERM=xterm \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHON_PIP_VERSION=19.2.3 \
+    PYTHON_PIPENV_VERSION=2018.11.26 \
+    PIP_NO_CACHE_DIR=1
 
 # -- Install Pipenv:
 RUN apt update && apt -y dist-upgrade && \
@@ -15,32 +20,18 @@ RUN apt update && apt -y dist-upgrade && \
       git \
       sudo \
       vim && \
-    pip install --upgrade pip && \
-    pip install pipenv && \
-    apt clean && rm -rf /var/lib/apt/lists/* && rm ~/.cache/pip* -rf
+    pip install pip==${PYTHON_PIP_VERSION} && \
+    pip install pipenv==${PYTHON_PIPENV_VERSION} && \
+    apt clean && rm -rf /var/lib/apt/lists/*
 
-ENV LC_ALL C.UTF-8
-ENV LANG C.UTF-8
-
-# -- Create non-root user:
-RUN useradd -ms /bin/bash $APP_USER && \
-    mkdir -p "$PROJECT_DIR" && \
-    chown -R $APP_USER: "$PROJECT_DIR" /usr/local /home/$APP_USER && \
-    usermod -aG sudo $APP_USER && \
-    sed -i.bkp -e 's/%sudo\s\+ALL=(ALL\(:ALL\)\?)\s\+ALL/%sudo ALL=NOPASSWD:ALL/g' /etc/sudoers
-
-# -- Create application directory:
-RUN set -ex && mkdir -p $PROJECT_DIR
-WORKDIR "$PROJECT_DIR"
-
-# -- Adding Pipfiles
-ONBUILD COPY Pipfile Pipfile
-ONBUILD COPY Pipfile.lock Pipfile.lock
+# -- Add Pipfiles:
+ONBUILD COPY \
+    Pipfile \
+    Pipfile.lock \
+    ./
 
 # -- Install dependencies:
-ONBUILD RUN set -ex && pipenv install $PIPENV_INSTALL_OPTS
-
-USER $APP_USER
+ONBUILD RUN set -ex && $REQUIREMENTS_INSTALL_CMD
 
 ################################################################################
 # Using this file
