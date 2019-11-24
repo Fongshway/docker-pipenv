@@ -18,7 +18,7 @@ steps:
   displayName: Build Docker image
   inputs:
     command: build
-    repository: fongshway/pipenv
+    repository: fongshway/python
 - task: Docker@2
   displayName: Logout of Docker Hub
   inputs:
