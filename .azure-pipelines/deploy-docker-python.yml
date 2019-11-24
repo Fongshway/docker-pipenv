@@ -24,7 +24,7 @@ steps:
     containerRegistry: $(imageRegistry)
     repository: fongshway/python
     tags: |
-      master
+      production
 - task: Docker@2
   displayName: Logout of Docker Hub
   inputs:
