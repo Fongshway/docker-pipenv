@@ -22,7 +22,7 @@ steps:
   inputs:
     command: buildAndPush
     containerRegistry: $(imageRegistry)
-    repository: fongshway/pipenv
+    repository: fongshway/python
     tags: |
       master
 - task: Docker@2
